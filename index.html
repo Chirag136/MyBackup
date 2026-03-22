@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Antigravity Phone Client</title>
+    <link rel="stylesheet" href="style.css?v=2">
+    <style>
+        .camera-btn { background: linear-gradient(135deg, #3b82f6, #8b5cf6); width: 150px; height: 150px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px auto; cursor: pointer; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5); transition: transform 0.2s; -webkit-tap-highlight-color: transparent; }
+        .camera-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <!-- Login View -->
+    <div class="container" id="login-view">
+        <header>
+            <h1>Antigravity Backup</h1>
+            <p>Welcome to Antigravity Backup.</p>
+        </header>
+        <div class="card glass">
+            <h2>Authentication Required</h2>
+            <p>Please authorize this relay server using the laptop.</p>
+            <button onclick="window.location.href='/auth/google'">Authorize Google Drive</button>
+        </div>
+    </div>
+
+    <!-- Main Upload View -->
+    <div class="container" id="main-view" style="display: none;">
+        <header>
+            <h1>Antigravity Backup</h1>
+            <p style="color: #10b981; font-weight: bold;">✓ Connected</p>
+        </header>
+        
+        <div class="card glass">
+            <div class="card" style="margin-top:0; border: none; background: transparent; padding:10px;">
+                <input type="file" id="fileInput" accept="image/*,video/*,application/pdf,*/*" multiple hidden>
+                <div class="camera-btn" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size:40px;">📸</div>
+                    <div>Mass Upload</div>
+                </div>
+                <p>Select as many photos as you want at the same time.</p>
+            </div>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="upload-status" class="status"></div>
+
+            <hr style="border-color:#334155; margin:30px 0;">
+            <button onclick="loadGallery()" style="margin-bottom:15px; width:100%; font-size:16px; padding:15px; background:linear-gradient(90deg, #10b981, #059669);">🖼️ Open Fullscreen Gallery</button>
+        </div>
+    </div>
+
+    <!-- Staging Approval Overlay -->
+    <div id="staging-view" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.95); z-index: 1000; flex-direction: column; align-items:center; justify-content:center; box-sizing: border-box; backdrop-filter: blur(10px);">
+        <div class="card glass" style="max-width: 90%; text-align:center;">
+            <div style="font-size:50px; margin-bottom:10px;">🤖</div>
+            <h2 style="margin-top:0;">Smart Scan Complete!</h2>
+            <p id="staging-summary" style="font-size:15px; color:#cbd5e1;">We intercepted some potentially unwanted files before backing up!</p>
+            <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:15px; margin:20px 0; border:1px solid #334155; text-align:left;">
+                <p style="margin:5px 0; font-weight:bold; color:#facc15;">🔍 Found <span id="spam-count">0</span> Text Macros</p>
+                <p style="margin:5px 0; font-weight:bold; color:#facc15;">👯 Found <span id="duplicate-count">0</span> Duplicates</p>
+            </div>
+            <button onclick="approveStaging(true)" style="background:linear-gradient(90deg, #ef4444, #b91c1c); margin-bottom:15px;">🗑️ Trash Junk & Upload <span id="clean-count">0</span> Clean</button>
+            <button onclick="approveStaging(false)" style="background:transparent; border:1px solid #334155; color:#94a3b8; font-size:14px; padding:10px;">Ignore warning, upload all files anyway.</button>
+        </div>
+    </div>
+
+    <!-- Fullscreen Gallery View Overlay -->
+    <div id="gallery-fullscreen-view" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0f172a; z-index: 999; flex-direction: column; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; padding: 15px; background: rgba(30, 41, 59, 0.95); border-bottom: 1px solid #334155; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;">
+            <button onclick="closeGallery()" style="margin: 0; padding: 8px 15px; background: #334155; color: white;">🔙 Back</button>
+            <h3 style="margin: 0; flex-grow: 1; text-align: center; color: white;">Laptop Storage</h3>
+            <div style="width: 70px;"></div> <!-- Spacer for absolute centering -->
+        </div>
+        <div id="fullscreen-grid" style="flex-grow: 1; overflow-y: auto; padding: 2px;">
+        </div>
+    </div>
+
+    <script src="app.js?v=8"></script>
+</body>
+</html>
