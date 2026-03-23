@@ -13,6 +13,13 @@ app.use(express.json());
 
 const TOKEN_PATH = 'tokens.json';
 
+process.on('uncaughtException', (err) => {
+    console.error("Uncaught exception prevented crash:", err.message || err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error("Unhandled Rejection prevented crash:", reason);
+});
+
 // Automatically reload tokens if the server restarts
 if (fs.existsSync(TOKEN_PATH)) {
     oauth2Client.setCredentials(JSON.parse(fs.readFileSync(TOKEN_PATH)));
@@ -65,16 +72,19 @@ app.post('/api/stage', upload.single('file'), async (req, res) => {
         const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
         
         let isSpam = false;
-        if (req.file.mimetype && req.file.mimetype.startsWith('image/')) {
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp'];
+        if (req.file.mimetype && validImageTypes.includes(req.file.mimetype)) {
             try {
                 if (ocrWorker) {
-                    const ret = await ocrWorker.recognize(req.file.path);
+                    const recognizePromise = ocrWorker.recognize(req.file.path);
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('OCR Timeout')), 5000));
+                    const ret = await Promise.race([recognizePromise, timeoutPromise]);
                     const text = ret.data.text.toLowerCase();
                     if (text.includes('good morning') || text.includes('good night') || text.includes('blessings') || text.includes('happy')) {
                         isSpam = true;
                     }
                 }
-            } catch(e) { console.error("OCR Failed", e); }
+            } catch(e) { console.error("OCR Failed", e.message); }
         }
         
         stagedUploads.set(fileId, {
